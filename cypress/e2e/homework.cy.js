@@ -1,47 +1,75 @@
-// task1_v2.cy.js
-// Alternative selectors for the same registration form elements
-// Uses different selector strategies: label association, data-* attributes, traversal, CSS classes, value attribute
+// all_actions_one_execution.cy.js
+// All actions from Register page in a single test execution
 
-describe('Task #1 - Alternative selectors (different from first solution)', () => {
-  beforeEach(() => {
+describe('Execute all actions from Register page in one go', () => {
+  it('should perform all interactions sequentially', () => {
+    // 1. Start on Register page
     cy.visit('https://demowebshop.tricentis.com/register');
-  });
 
-  it('should verify each element using a completely different set of selectors', () => {
-    // 1. Gender Male radio button – using label association (click label to check radio)
-    cy.contains('label', 'Male').click();
-    cy.get('#gender-male').should('be.checked');
+    // 2. Gender radio button
+    cy.get('#gender-male').check();
 
-    // 2. Gender Female radio button – using parent traversal and find input by value
-    cy.contains('label', 'Female')
-      .parent() // the <label> itself, but we need the input inside? Actually label wraps input? No, input is separate.
-      // Better: use sibling input, but simpler: use data attribute
-      cy.get('input[value="F"]').check();
-    cy.get('input[value="F"]').should('be.checked');
+    // 3. First name field
+    cy.get('#FirstName').type('John');
 
-    // Alternative for Female: using data-val attribute
-    cy.get('input[data-val-required="Gender is required."][value="F"]').check();
+    // 4. Last name field (optional, but added for completeness)
+    cy.get('#LastName').type('Doe');
 
-    // 3. First Name input – using CSS class .text-box and then filtering by placeholder or preceding label
-    cy.get('.text-box')
-      .first() // First name is the first .text-box on the page? Not reliable. Better:
-      cy.get('label[for="FirstName"]').next('input').should('exist');
+    // 5. Register button (clicks but may fail because required fields missing? Let's keep)
+    cy.get('#register-button').click();
+    // Note: This will attempt registration and likely show validation errors, but continues.
 
-    // 4. Last Name input – using contains on label and then find next input
-    cy.contains('label', 'Last name').next('input').should('exist');
+    // 6. Go back to Register page to continue other actions? Better to keep on same page or re-visit?
+    // The requirement says "on the same website" but starting from register page.
+    // I'll re-visit register page after actions that navigate away, to ensure all actions can be executed.
+    // However, to keep it realistic, I'll re-visit after navigation steps.
 
-    // 5. Email input – using data-val-required attribute
-    cy.get('input[data-val-required="Email is required."]').should('exist');
+    // --- Following actions may navigate away, so we re-visit register page each time ---
 
-    // 6. Password input – using data-val-required for password
-    cy.get('input[data-val-required="Password is required."]').should('exist');
+    // 7. Jewelry – top menu (this will navigate to Jewelry page)
+    cy.visit('https://demowebshop.tricentis.com/register'); // back to register
+    cy.get('.top-menu').contains('a', 'Jewelry').click();
 
-    // 7. Confirm Password input – using data-val-equalto-other attribute
-    cy.get('input[data-val-equalto-other="*.Password"]').should('exist');
+    // 8. Log in link (navigates to login)
+    cy.visit('https://demowebshop.tricentis.com/register');
+    cy.get('.ico-login').click();
 
-    // 8. Register button – using value attribute selector
-    cy.get('input[value="Register"]').should('exist');
-    // Also possible: using class .button-1
-    cy.get('.button-1.register-next-step-button').should('exist');
+    // 9. Search field (on register page, type)
+    cy.visit('https://demowebshop.tricentis.com/register');
+    cy.get('#small-searchterms').click().type('jewelry');
+
+    // 10. Contact us link (footer)
+    cy.visit('https://demowebshop.tricentis.com/register');
+    cy.get('.footer').contains('a', 'Contact us').click();
+
+    // 11. My account – <h3> element in footer
+    cy.visit('https://demowebshop.tricentis.com/register');
+    cy.get('.footer h3').contains('My account').click();
+
+    // 12. My account – actual link below h3
+    cy.visit('https://demowebshop.tricentis.com/register');
+    cy.get('.footer h3')
+      .contains('My account')
+      .parents('.column')
+      .find('a')
+      .contains('My account')
+      .click();
+
+    // 13. Subscribe to newsletter
+    cy.visit('https://demowebshop.tricentis.com/register');
+    cy.get('#newsletter-email').type('testuser' + Date.now() + '@example.com');
+    cy.get('#newsletter-subscribe-button').click();
+
+    // 14. Gift Cards link (top menu)
+    cy.visit('https://demowebshop.tricentis.com/register');
+    cy.get('.top-menu a[href="/gift-cards"]').click();
+
+    // 15. Gift Cards from left sidebar
+    cy.visit('https://demowebshop.tricentis.com/register');
+    cy.get('.block-category-navigation a[href="/gift-cards"]').click();
+
+    // 16. Demo Web Shop logo (navigates to homepage)
+    cy.visit('https://demowebshop.tricentis.com/register');
+    cy.get('img[alt="Tricentis Demo Web Shop"]').click();
   });
 });
