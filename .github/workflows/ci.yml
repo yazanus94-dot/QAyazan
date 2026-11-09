@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run smoke e2e specs (no login required)
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          install-command: npm ci
+          spec: |
+            cypress/e2e/products/product_search.cy.js
+            cypress/e2e/products/add_to_cart.cy.js

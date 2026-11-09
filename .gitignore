@@ -1,0 +1,21 @@
+# npm / Cypress
+node_modules/
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+coverage/
+
+# Never commit real test credentials
+cypress.env.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
