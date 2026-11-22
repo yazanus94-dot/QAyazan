@@ -1,38 +1,41 @@
 /* Product review E2E test (requires a logged-in test account). */
 describe('Add Product Review', () => {
-  it('should allow logged-in user to add a review', () => {
-    const email = Cypress.env('userEmail');
-    const password = Cypress.env('userPassword');
+  beforeEach(() => {
+    cy.fixture('test-data').as('testData');
+  });
 
-    if (!email || !password) {
-      throw new Error(
-        'Missing credentials. Copy cypress.env.json.example to ' +
-        'cypress.env.json and set userEmail / userPassword before ' +
-        'running the auth specs.');
-    }
+  it('should allow logged-in user to add a review @smoke', function () {
+    const email = Cypress.env('userEmail') || this.testData.validUser.email;
+    const password = Cypress.env('userPassword') || this.testData.validUser.password;
+    const review = this.testData.review;
 
-    cy.visit('/');
+    cy.login(email, password);
+    cy.goToProducts();
+    cy.get('.choose a').first().click();
 
-    cy.contains('Signup / Login').click();
+    cy.addProductReview({
+      name: review.name,
+      email: email,
+      review: review.review,
+    });
+  });
 
-    cy.get('[data-qa="login-email"]').type(email);
-    cy.get('[data-qa="login-password"]').type(password, { parseSpecialCharSequences: false });
-    cy.get('[data-qa="login-button"]').click();
+  it('should reject empty review', function () {
+    const email = Cypress.env('userEmail') || this.testData.validUser.email;
+    const password = Cypress.env('userPassword') || this.testData.validUser.password;
 
-    cy.contains('Logged in as').should('be.visible');
-
-    cy.contains('Products').click();
-
-    cy.url().should('include', '/products');
-
+    cy.login(email, password);
+    cy.goToProducts();
     cy.get('.choose a').first().click();
 
     cy.get('#name').type('Test Reviewer');
     cy.get('#email').type(email);
-    cy.get('#review').type('This is a good product');
-
+    cy.get('#review').clear();
     cy.get('#button-review').click();
 
-    cy.contains('Thank you for your review', { timeout: 10000 }).should('be.visible');
+    // Should show validation error or not submit
+    cy.get('#review').then(($el) => {
+      expect($el[0].validationMessage).to.not.be.empty;
+    });
   });
 });

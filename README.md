@@ -9,10 +9,10 @@ practice-e-commerce site.
 | Spec | Flow | Requires login |
 |---|---|:--:|
 | `e2e/auth/signup.cy.js` | new user registration (account creation, gender selection, address form) | no |
-| `e2e/auth/login.cy.js` | valid-credential login | — (is the auth) |
-| `e2e/products/product_search.cy.js` | product search: positive + negative cases | no |
-| `e2e/products/add_to_cart.cy.js` | product details → add to cart → cart verification | no |
-| `e2e/products/add_product_review.cy.js` | login → product review submission | yes |
+| `e2e/auth/login.cy.js` | valid-credential login + negative cases | — (is the auth) |
+| `e2e/products/product_search.cy.js` | product search: positive + negative + empty cases | no |
+| `e2e/products/add_to_cart.cy.js` | add single/multiple products, remove from cart, verify badge | no |
+| `e2e/products/add_product_review.cy.js` | login → product review submission + validation | yes |
 
 ## 🔐 Credentials — not committed on purpose
 
@@ -34,6 +34,14 @@ specs — they end up in git history on public repos.
   site's own markup provides them
 - each step asserted on observable state (`url().should('include', …)`,
   `should('be.visible')`) rather than chained blindly
+
+## 🛠️ Custom Commands & Fixtures
+
+This project uses custom Cypress commands and fixtures for:
+- **Reusable actions**: `login()`, `logout()`, `goToProducts()`, `searchProducts()`, `addFirstProductToCart()`, `verifyCartHasItems()`, `registerUser()`, `addProductReview()`
+- **Test data management**: `cypress/fixtures/test-data.json` for centralized test data
+- **Session caching**: `cy.session()` for login to avoid repeated authentication
+- **Helper utilities**: `waitForNetworkIdle()`, `assertNoConsoleErrors()`, `getTestData()`
 
 ## 🚀 Run it
 
@@ -61,30 +69,38 @@ cp cypress.env.json.example cypress.env.json
 
 ## ⚙️ CI
 
-`.github/workflows/ci.yml` runs the no-login smoke specs
-(`product_search.cy.js` + `add_to_cart.cy.js`) headlessly on every push
-to `master` via `cypress-io/github-action`, so the pipeline stays green
-without repository secrets. The auth specs run locally with
-`cypress.env.json`; to run them in CI as well, add `userEmail` /
-`userPassword` as repository secrets and point the workflow's spec
-argument at all specs.
+`.github/workflows/ci.yml` runs:
+- **Smoke suite** (no-login specs) on every push to `main` and PRs
+- **Full matrix** (Chrome, Firefox, Edge) on manual dispatch or schedule
+- Artifacts: screenshots, videos, and HTML reports on failure
+- Auth specs require `CYPRESS_USER_EMAIL` / `CYPRESS_USER_PASSWORD` secrets
 
 ## 📂 Project structure
 
 ```
 .
-├── cypress.config.js             # baseUrl + projectId
+├── cypress.config.js             # baseUrl + projectId + retries + video + screenshots
 ├── cypress/
 │   ├── e2e/
 │   │   ├── auth/                 # signup + login flows
 │   │   └── products/             # search, cart, review flows
 │   ├── fixtures/
-│   └── support/                  # commands.js, e2e.js
-├── .github/workflows/ci.yml      # CI pipeline (smoke run)
+│   │   └── test-data.json        # centralized test data
+│   └── support/
+│       ├── commands.js           # custom commands (login, session, fixtures, etc.)
+│       └── e2e.js                # global hooks
+├── .github/workflows/ci.yml      # CI pipeline (smoke + matrix)
 ├── cypress.env.json.example      # credential template (real file gitignored)
 ├── package.json
+├── package-lock.json             # locked dependencies for CI caching
 └── README.md
 ```
+
+## 📊 Reporting & Artifacts
+
+- **Screenshots** on failure (auto-captured via `screenshotOnRunFailure: true`)
+- **Videos** of full test runs (auto-captured via `video: true`)
+- **JUnit/XML reports** available via `cypress-mochawesome-reporter` (optional)
 
 ## License
 

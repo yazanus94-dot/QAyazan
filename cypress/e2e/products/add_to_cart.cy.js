@@ -1,19 +1,23 @@
-/* Add-to-cart E2E test. No authentication required. */
+/* Add-to-cart E2E test using custom commands. No authentication required. */
 describe('Add Product to Cart', () => {
-  it('should add product from product details page', () => {
-    cy.visit('/');
+  it('should add product from product details page @smoke', () => {
+    cy.goToProducts();
+    cy.addFirstProductToCart();
+    cy.verifyCartHasItems(1);
+  });
 
-    cy.contains('Products').click();
+  it('should add multiple products to cart', () => {
+    cy.goToProducts();
+    cy.addFirstProductToCart();
+    cy.goToProducts();
+    cy.addFirstProductToCart();
+    cy.verifyCartHasItems(2);
+  });
 
-    cy.url().should('include', '/products');
-
-    cy.get('.choose a').first().click();
-
-    cy.contains('Add to cart').click();
-
-    cy.contains('View Cart').click();
-
-    cy.url().should('include', '/view_cart');
-    cy.get('.cart_description').should('be.visible');
+  it('should remove product from cart', () => {
+    cy.goToProducts();
+    cy.addFirstProductToCart();
+    cy.get('.cart_quantity_delete').click();
+    cy.get('.cart_description').should('not.exist');
   });
 });

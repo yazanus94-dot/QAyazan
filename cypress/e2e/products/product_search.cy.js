@@ -1,25 +1,33 @@
 /* Product search E2E tests (positive + negative). No authentication required. */
 describe('Search Product', () => {
-  it('valid product search', () => {
-    cy.visit('/');
+  beforeEach(() => {
+    cy.fixture('test-data').as('testData');
+  });
 
-    cy.contains('Products').click();
+  it('valid product search @smoke', function () {
+    const term = this.testData.products.searchTerms.valid;
 
-    cy.url().should('include', '/products');
-
-    cy.get('#search_product').type('Top');
-    cy.get('#submit_search').click();
-
-    cy.get('.features_items').should('be.visible');
+    cy.goToProducts();
+    cy.searchProducts(term);
     cy.get('.productinfo').should('exist');
   });
 
-  it('invalid product search', () => {
-    cy.visit('/products');
+  it('invalid product search returns no results', function () {
+    const term = this.testData.products.searchTerms.invalid;
 
-    cy.get('#search_product').type('INVALID123');
-    cy.get('#submit_search').click();
+    cy.goToProducts();
+    cy.searchProducts(term);
 
+    // Should show empty state or no products
+    cy.get('.features_items').should('be.visible');
     cy.get('.productinfo').should('not.exist');
+  });
+
+  it('empty search shows all products', () => {
+    cy.goToProducts();
+    cy.get('#search_product').clear();
+    cy.get('#submit_search').click();
+    cy.get('.features_items').should('be.visible');
+    cy.get('.productinfo').should('exist');
   });
 });
