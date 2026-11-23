@@ -1,8 +1,8 @@
-name: CI
+name: Cypress E2E Tests
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
     branches: [master]
   workflow_dispatch:
@@ -11,8 +11,10 @@ jobs:
   # Chrome job: smoke specs that don't require login
   chrome:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Run smoke e2e specs (Chrome)

@@ -1,0 +1,33 @@
+{
+  "validUser": {
+    "email": "testuser@example.com",
+    "password": "TestPass123!"
+  },
+  "invalidUsers": [
+    { "email": "wrong@example.com", "password": "badpass", "description": "unknown user" },
+    { "email": "testuser@example.com", "password": "wrong-password", "description": "wrong password" },
+    { "email": "", "password": "", "description": "empty fields" }
+  ],
+  "registration": {
+    "name": "Test Registration User",
+    "firstName": "Test",
+    "lastName": "User",
+    "address": "Test Address 1",
+    "country": "Canada",
+    "state": "Test State",
+    "city": "Test City",
+    "zipcode": "00000",
+    "mobile": "0000000000"
+  },
+  "products": {
+    "searchTerms": {
+      "valid": "Top",
+      "invalid": "INVALID123"
+    }
+  },
+  "review": {
+    "name": "Test Reviewer",
+    "email": "testuser@example.com",
+    "review": "This is a good product"
+  }
+}
