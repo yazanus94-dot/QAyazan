@@ -5,15 +5,17 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
-  e2e:
+  # Chrome job: smoke specs that don't require login
+  chrome:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run smoke e2e specs (no login required)
+      - name: Run smoke e2e specs (Chrome)
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
@@ -21,3 +23,65 @@ jobs:
           spec: |
             cypress/e2e/products/product_search.cy.js
             cypress/e2e/products/add_to_cart.cy.js
+
+      - name: Upload Chrome screenshots and videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-cypress-artifacts
+          path: |
+            cypress/screenshots/
+            cypress/videos/
+          retention-days: 7
+
+  # Firefox matrix job
+  firefox:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run e2e specs (Firefox)
+        uses: cypress-io/github-action@v6
+        with:
+          browser: firefox
+          install-command: npm ci
+          spec: |
+            cypress/e2e/products/product_search.cy.js
+            cypress/e2e/products/add_to_cart.cy.js
+
+      - name: Upload Firefox screenshots and videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: firefox-cypress-artifacts
+          path: |
+            cypress/screenshots/
+            cypress/videos/
+          retention-days: 7
+
+  # Edge matrix job
+  edge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run e2e specs (Edge)
+        uses: cypress-io/github-action@v6
+        with:
+          browser: edge
+          install-command: npm ci
+          spec: |
+            cypress/e2e/products/product_search.cy.js
+            cypress/e2e/products/add_to_cart.cy.js
+
+      - name: Upload Edge screenshots and videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: edge-cypress-artifacts
+          path: |
+            cypress/screenshots/
+            cypress/videos/
+          retention-days: 7
